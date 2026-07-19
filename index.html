@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to integrate email</title>
+</head>
+<body>
+    <div class="contact-container">
+    <h2>Me contacter</h2>
+    
+    <!-- Formourd d'envoi -->
+    <form id="contactForm">
+        <!-- Insérez ici votre clé d'accès gratuite Web3Forms -->
+        <input type="hidden" name="access_key" value="VOTRE_CLE_ACCES_ICI">
+
+        <div class="form-group">
+            <label for="name">Nom</label>
+            <input type="text" id="name" name="name" placeholder="Votre nom" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" placeholder="votre@email.com" required>
+        </div>
+
+        <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="5" placeholder="Votre message..." required></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn">Envoyer le message</button>
+    </form>
+
+    <!-- Zone pour afficher les messages de succès ou d'erreur -->
+    <div id="formResult" class="form-result"></div>
+</div>
+
+<style>
+/* Style global du conteneur */
+.contact-container {
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.contact-container h2 {
+    margin-bottom: 1.5rem;
+    color: #333;
+    text-align: center;
+}
+
+/* Espacement des champs */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #555;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Style des entrées de texte */
+.form-group input, 
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus, 
+.form-group textarea:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+/* Style du bouton */
+#submitBtn {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#submitBtn:hover {
+    background-color: #0056b3;
+}
+
+#submitBtn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Style des messages de retour */
+.form-result {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 0.95rem;
+    display: none; /* Caché par défaut */
+}
+
+.form-result.success {
+    display: block;
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.form-result.error {
+    display: block;
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+</style>
+
+<script>
+const form = document.getElementById('contactForm');
+const result = document.getElementById('formResult');
+const submitBtn = document.getElementById('submitBtn');
+
+form.addEventListener('submit', function(e) {
+    e.preventDefault(); // Empêche le rechargement de la page
+    
+    // Changement de l'état du bouton pendant l'envoi
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Envoi en cours...";
+    
+    const formData = new FormData(form);
+    const object = Object.fromEntries(formData);
+    const json = JSON.stringify(object);
+
+    result.className = "form-result"; // Réinitialise les classes
+    result.style.display = "none";
+
+    fetch('https://web3forms.com', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: json
+    })
+    .then(async (response) => {
+        let jsonResponse = await response.json();
+        if (response.status == 200) {
+            result.classList.add('success');
+            result.innerText = "Merci ! Votre message a bien été envoyé.";
+            form.reset(); // Vide les champs du formulaire
+        } else {
+            result.classList.add('error');
+            result.innerText = jsonResponse.message || "Une erreur est survenue.";
+        }
+    })
+    .catch(error => {
+        result.classList.add('error');
+        result.innerText = "Impossible de joindre le serveur. Réessayez plus tard.";
+    })
+    .then(() => {
+        // Remet le bouton à son état initial
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Envoyer le message";
+    });
+});
+</script>
+
+</body>
+</html>
